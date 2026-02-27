@@ -82,18 +82,6 @@ NOMBRE_MODOS = {
     MODO_TURBO:    "TURBO",
 }
 
-# ─── Controles de los 4 jugadores (modo 4J) ─────────────────────────────────
-# J1 (arriba)    → A / D        (horizontal)
-# J2 (derecha)   → ↑ / ↓        (vertical)
-# J3 (abajo)     → I / K        (horizontal)
-# J4 (izquierda) → L / P        (vertical)
-# ─────────────────────────────────────────────────────────────────────────────
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  CLASES DE EFECTOS
-# ═══════════════════════════════════════════════════════════════════════════════
-
 class Particula:
     def __init__(self, x, y, color):
         a         = random.uniform(0, 2 * math.pi)
@@ -135,11 +123,6 @@ class Particulas:
         for p in self.pool:
             p.tick()
             p.draw(surf)
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  RENDERIZADO
-# ═══════════════════════════════════════════════════════════════════════════════
 
 def fondo_gradiente():
     s = pygame.Surface((VENTANA_HORI, VENTANA_VERT))
@@ -281,11 +264,6 @@ def draw_hud_4j(surf, fuentes, puntos, vidas, modo):
     pausa_hint = f_peq.render("ESC = pausa", True, (70, 70, 90))
     surf.blit(pausa_hint, (cx - pausa_hint.get_width()//2, 54))
 
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  FÍSICA — BOLA
-# ═══════════════════════════════════════════════════════════════════════════════
-
 class Bola:
     def __init__(self, vel_factor=1.0):
         self.r        = BOLA_R
@@ -354,18 +332,9 @@ class Bola:
                 particulas.emitir(self.x, CANCHA_ABA, GRIS_MEDIO, 8)
 
     def rebotar_4j(self, particulas, vidas, colores_j, puntos, raquetas):
-        """
-        Maneja rebotes en los 4 bordes del modo 4J/SUPERVIV.
-        Solo se descuenta vida o se suma punto cuando la bola REALMENTE
-        toca el borde (una única vez por impacto, gracias al flag ya_reboto)
-        y la raqueta defensora NO cubre la posición de la bola en ese momento.
 
-        raquetas = [r_j1_arriba, r_j2_derecha, r_j3_abajo, r_j4_izquierda]
-        puntos   = lista mutable de 4 enteros [J1, J2, J3, J4]
-        """
         r_arr, r_der, r_aba, r_izq = raquetas
 
-        # ── Borde IZQUIERDO  (defensor = J4, gana J2) ──────────────────────
         if self.x - self.r <= CANCHA_IZQ and self.dx < 0:
             defensa_ok = r_izq.y <= self.y <= r_izq.y + r_izq.h
             if not defensa_ok:
@@ -375,7 +344,6 @@ class Bola:
             self.x  = CANCHA_IZQ + self.r + 1
             self.dx = abs(self.dx)
 
-        # ── Borde DERECHO   (defensor = J2, gana J4) ──────────────────────
         if self.x + self.r >= CANCHA_DER and self.dx > 0:
             defensa_ok = r_der.y <= self.y <= r_der.y + r_der.h
             if not defensa_ok:
@@ -385,7 +353,6 @@ class Bola:
             self.x  = CANCHA_DER - self.r - 1
             self.dx = -abs(self.dx)
 
-        # ── Borde SUPERIOR  (defensor = J1, gana J3) ──────────────────────
         if self.y - self.r <= CANCHA_ARR and self.dy < 0:
             defensa_ok = r_arr.x <= self.x <= r_arr.x + r_arr.w
             if not defensa_ok:
@@ -395,7 +362,6 @@ class Bola:
             self.y  = CANCHA_ARR + self.r + 1
             self.dy = abs(self.dy)
 
-        # ── Borde INFERIOR  (defensor = J3, gana J1) ──────────────────────
         if self.y + self.r >= CANCHA_ABA and self.dy > 0:
             defensa_ok = r_aba.x <= self.x <= r_aba.x + r_aba.w
             if not defensa_ok:
@@ -404,11 +370,6 @@ class Bola:
             particulas.emitir(self.x, CANCHA_ABA, colores_j[2], 28)
             self.y  = CANCHA_ABA - self.r - 1
             self.dy = -abs(self.dy)
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  FÍSICA — RAQUETA
-# ═══════════════════════════════════════════════════════════════════════════════
 
 class Raqueta:
     def __init__(self, x, y, largo, grosor, color, orientacion="V"):
@@ -475,11 +436,6 @@ class Raqueta:
         particulas.emitir(bola.x, bola.y, self.color, 14)
         return True
 
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  UTILIDADES UI
-# ═══════════════════════════════════════════════════════════════════════════════
-
 def crear_fuentes():
     return (
         pygame.font.SysFont("Consolas", 38, bold=True),
@@ -514,19 +470,8 @@ class Boton:
         return (ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1
                 and self.rect.collidepoint(ev.pos))
 
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  MENÚ DE PAUSA
-# ═══════════════════════════════════════════════════════════════════════════════
-
 def menu_pausa(ventana, captura, fuentes, modo, clock):
-    """
-    Muestra el menú de pausa sobre una captura congelada del juego.
-    Retorna:
-        "reanudar"  → continuar la partida
-        "menu"      → volver al menú principal
-        "salir"     → cerrar el programa
-    """
+
     f_gr, f_med, f_peq, f_tit, f_sub, f_btn, f_info = fuentes
     cx = VENTANA_HORI // 2
 
@@ -580,20 +525,8 @@ def menu_pausa(ventana, captura, fuentes, modo, clock):
         pygame.display.flip()
         clock.tick(FPS)
 
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  SELECCIÓN DE RIVAL (para modos con opción CPU / 2 jugadores)
-# ═══════════════════════════════════════════════════════════════════════════════
-
 def pantalla_seleccion_rival(ventana, fondo, fuentes, modo, clock):
-    """
-    Pantalla intermedia que aparece al seleccionar un modo que admite
-    tanto CPU como un segundo jugador humano.
-    Retorna:
-        True   → jugar contra CPU
-        False  → jugar contra otro jugador (J1 vs J2)
-        None   → volver al menú principal (ESC)
-    """
+
     f_gr, f_med, f_peq, f_tit, f_sub, f_btn, f_info = fuentes
     cx = VENTANA_HORI // 2
 
@@ -636,7 +569,6 @@ def pantalla_seleccion_rival(ventana, fondo, fuentes, modo, clock):
         ov.fill((0, 0, 0, 105))
         ventana.blit(ov, (0, 0))
 
-        # Titulo del modo seleccionado
         pulso   = 0.5 + 0.5 * math.sin(tick * 0.05)
         c_modo  = tuple(min(255, int(c + 40 * pulso)) for c in color_modo)
         t_modo  = f_sub.render(nombre_modo, True, c_modo)
@@ -645,22 +577,17 @@ def pantalla_seleccion_rival(ventana, fondo, fuentes, modo, clock):
         t_preg = f_med.render("¿Contra quien quieres jugar?", True, GRIS_MEDIO)
         ventana.blit(t_preg, (cx - t_preg.get_width()//2, 185))
 
-        # Linea decorativa bajo el titulo
         lw = 340
         pygame.draw.line(ventana, color_modo,
                          (cx - lw//2, 160), (cx + lw//2, 160), 2)
 
-        # Panel de iconos descriptivos (CPU vs Humano)
         icon_y = 230
-        # CPU side
         c_cpu = CYAN if hover_rival is True else (60, 60, 80)
         pygame.draw.circle(ventana, c_cpu, (cx - 80, icon_y), 22, 2)
         t_ic = f_peq.render("CPU", True, c_cpu)
         ventana.blit(t_ic, (cx - 80 - t_ic.get_width()//2, icon_y - 8))
-        # VS label
         t_vs = f_med.render("VS", True, GRIS_MEDIO)
         ventana.blit(t_vs, (cx - t_vs.get_width()//2, icon_y - 13))
-        # Humano side
         c_hu = AMARILLO if hover_rival is False else (60, 60, 80)
         pygame.draw.circle(ventana, c_hu, (cx + 80, icon_y), 22, 2)
         t_ih = f_peq.render("J2", True, c_hu)
@@ -670,7 +597,6 @@ def pantalla_seleccion_rival(ventana, fondo, fuentes, modo, clock):
         btn_j2.draw(ventana, mp)
         btn_back.draw(ventana, mp)
 
-        # Mostrar controles al hacer hover
         if hover_rival is not None:
             tc = f_info.render(CONTROLES[hover_rival], True, color_modo)
             ventana.blit(tc, (cx - tc.get_width()//2, btn_back.rect.bottom + 14))
@@ -680,11 +606,6 @@ def pantalla_seleccion_rival(ventana, fondo, fuentes, modo, clock):
 
         pygame.display.flip()
         clock.tick(FPS)
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  PANTALLAS DE INICIO / MENÚ / FIN
-# ═══════════════════════════════════════════════════════════════════════════════
 
 def pantalla_menu(ventana, fondo, fuentes, clock):
     f_gr, f_med, f_peq, f_tit, f_sub, f_btn, f_info = fuentes
@@ -853,11 +774,6 @@ def pantalla_fin_4j(ventana, fondo, fuentes, puntos, vidas, modo, clock):
         pygame.display.flip()
         clock.tick(FPS)
 
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  BUCLES DE JUEGO
-# ═══════════════════════════════════════════════════════════════════════════════
-
 def jugar_2j(ventana, fondo, fuentes, modo, clock, es_ia=None):
     f_gr, f_med, f_peq, f_tit, f_sub, f_btn, f_info = fuentes
     fuentes_hud = (f_gr, f_med, f_peq)
@@ -871,7 +787,6 @@ def jugar_2j(ventana, fondo, fuentes, modo, clock, es_ia=None):
     partic = Particulas()
     meta   = META_RAPIDO if modo == MODO_RAPIDO else META_NORMAL
 
-    # Si es_ia no fue especificado externamente, lo derivamos del modo
     if es_ia is None:
         es_ia = modo in (MODO_VS_CPU, MODO_RAPIDO, MODO_CRONO, MODO_BOLAS2, MODO_TURBO)
 
@@ -884,7 +799,6 @@ def jugar_2j(ventana, fondo, fuentes, modo, clock, es_ia=None):
                     (CANCHA_ARR + CANCHA_ABA)//2 - RAQUETA_LARGO//2,
                     RAQUETA_LARGO, RAQUETA_GROSOR, MAGENTA, "V")
 
-    # Nombres en HUD según modo y rival
     if modo == MODO_1V1:
         nj, nia = "J1", "J2"
     elif modo == MODO_VS_CPU:
@@ -979,10 +893,6 @@ def jugar_4j(ventana, fondo, fuentes, modo, clock):
     cx = CANCHA_IZQ + (CANCHA_DER - CANCHA_IZQ) // 2
     cy = CANCHA_ARR + (CANCHA_ABA - CANCHA_ARR) // 2
 
-    # J1 arriba   → A / D  (horizontal)
-    # J2 derecha  → ↑ / ↓  (vertical)
-    # J3 abajo    → W / S  (horizontal)   ← CORREGIDO
-    # J4 izquierda → I / K (vertical)
     r_j1 = Raqueta(cx - RAQUETA_LARGO_H//2, CANCHA_ARR,
                    RAQUETA_LARGO_H, RAQUETA_GROSOR, CYAN,    "H")
     r_j2 = Raqueta(CANCHA_DER - RAQUETA_GROSOR, cy - RAQUETA_LARGO//2,
@@ -1013,18 +923,12 @@ def jugar_4j(ventana, fondo, fuentes, modo, clock):
             if ev.type == pygame.KEYUP:
                 teclas.discard(ev.key)
 
-        # J1 (arriba)    — teclas A/D  → desplazan la raqueta horizontalmente
         r_j1.mover_j(pygame.K_a     in teclas, pygame.K_d    in teclas)
-        # J2 (derecha)   — teclas ↑/↓ → desplazan la raqueta verticalmente
         r_j2.mover_j(pygame.K_UP    in teclas, pygame.K_DOWN in teclas)
-        # J3 (abajo)     — teclas I/K  → desplazan la raqueta horizontalmente
         r_j3.mover_j(pygame.K_i     in teclas, pygame.K_k    in teclas)
-        # J4 (izquierda) — teclas L/P  → desplazan la raqueta verticalmente
         r_j4.mover_j(pygame.K_l     in teclas, pygame.K_p    in teclas)
 
         bola.mover()
-
-        # rebotar_4j ahora decide punto/vida internamente una sola vez por impacto
         bola.rebotar_4j(partic,
                         vidas  if modo == MODO_SUPERVIV else None,
                         colores_j,
@@ -1070,11 +974,6 @@ def jugar_4j(ventana, fondo, fuentes, modo, clock):
 
     return puntos, vidas, True
 
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  PUNTO DE ENTRADA
-# ═══════════════════════════════════════════════════════════════════════════════
-
 def main():
     ventana = pygame.display.set_mode((VENTANA_HORI, VENTANA_VERT))
     pygame.display.set_caption("PyPong Pro")
@@ -1086,7 +985,7 @@ def main():
     MODOS_CON_SELECCION = (MODO_RAPIDO, MODO_CRONO, MODO_BOLAS2, MODO_TURBO)
 
     modo    = None
-    es_ia   = None   # se define en pantalla_seleccion_rival o implícito por modo
+    es_ia   = None   
     running = True
 
     while running:
@@ -1096,17 +995,15 @@ def main():
             if modo is None:
                 break
 
-            # Modos con rival fijo — no necesitan pantalla de selección
             if modo == MODO_VS_CPU:
                 es_ia = True
             elif modo == MODO_1V1:
                 es_ia = False
             elif modo in MODOS_CON_SELECCION:
                 es_ia = pantalla_seleccion_rival(ventana, fondo, fuentes, modo, clock)
-                if es_ia is None:      # el jugador presionó ESC / Volver
+                if es_ia is None:      
                     modo = None
                     continue
-            # MODOS_4J no usan es_ia (siempre son multijugador local)
 
         if modo in MODOS_4J:
             puntos, vidas, normal = jugar_4j(ventana, fondo, fuentes, modo, clock)
@@ -1126,7 +1023,7 @@ def main():
             res = pantalla_fin_2j(ventana, fondo, fuentes, pj, pia, modo, clock, es_ia)
 
         if res == "nuevo":
-            pass          # repite con el mismo modo y el mismo es_ia
+            pass          
         elif res == "menu":
             modo = None
         else:
