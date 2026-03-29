@@ -38,9 +38,28 @@ El proyecto incluye **8 modos distintos**, cada uno con reglas y metas específi
 
 ---
 
-##  Instalación y Uso
+## Instalación y Ejecución
 
-### Requisitos Previos
-Asegúrate de tener instalado Python y la librería Pygame:
-```bash
-pip install pygame
+1. **Requisitos Previos**
+   Asegúrate de tener instalado Python y la librería Pygame:
+   ```bash
+   pip install pygame
+   pip install numpy
+   
+2. **Instala las dependencias**
+   ```bash
+   python PyPong.py
+
+## Detalles Técnicos
+Lenguaje: Python 3.x
+
+Motor: Pygame
+
+Resolución: 900x660 píxeles
+
+Arquitectura: Orientada a objetos (Clases para Bola, Raqueta, Particula, Boton).
+
+## Licencia
+Este proyecto es de código abierto. ¡Siéntete libre de modificarlo, añadir nuevos modos o mejorar la IA!
+
+Desarrollado con ❤️ por **Andres Carrillo/AndresCarrillo444**
